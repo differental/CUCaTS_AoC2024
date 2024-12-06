@@ -140,9 +140,8 @@ def main():
             final_image[y * SHARD_HEIGHT:(y + 1) * SHARD_HEIGHT,
                         x * SHARD_WIDTH:(x + 1) * SHARD_WIDTH] = shard.pixels
 
-    with open("output.png", "wb") as f:
-        writer = png.Writer(width=final_image.shape[1], height=final_image.shape[0], greyscale=True)
-        writer.write(f, final_image.tolist())
+    image = png.from_array(final_image, "RGB")
+    image.save("output.png")
 
 if __name__ == "__main__":
     main()
