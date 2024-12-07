@@ -1,8 +1,7 @@
 import png # https://pypng.readthedocs.io/en/latest/
 import os
 import numpy as np
-
-from sklearn.metrics.pairwise import euclidean_distances
+import math
 
 SHARD_WIDTH = 336
 SHARD_HEIGHT = 64
@@ -21,10 +20,10 @@ class Shard:
     
     def build_edges(self):
         self.edges = [
-            self.pixels[:, 0], # left
-            self.pixels[0, :], # top 
-            self.pixels[:, -1], # right 
-            self.pixels[-1, :] # bottom
+            self.pixels[:, :3], # left
+            self.pixels[0, :].reshape(-1, 3), # top 
+            self.pixels[:, -3:], # right 
+            self.pixels[-1, :].reshape(-1, 3) # bottom
         ]
     
     def compare_to_opposite_edge(self, edge_no, other):
@@ -36,12 +35,18 @@ class Shard:
         edge_b = other.edges[other_edge_no]
 
         #print(euclidean_distances([edge_a], [edge_b])[0][0])
-        return euclidean_distances([edge_a], [edge_b])[0][0]
+        #return euclidean_distances([edge_a], [edge_b])[0][0]
 
         #print(edge_a, edge_b)
         #print(np.sum(np.abs(edge_a - edge_b)))
-
-        #return np.sum(np.abs(edge_a - edge_b))
+        
+        diff = np.abs(edge_a - edge_b)
+        
+        val = 0
+        for t in diff:
+            val += math.sqrt(t[0]**2 + t[1]**2 + t[2]**2)
+        
+        return val / len(diff)
 
 def main():
     files = os.listdir("chunks")
@@ -84,8 +89,10 @@ def main():
 
     #print(scores[0][0].filename, scores[0][1].filename, scores[0][2], int(scores[0][3]))
 
-    #for score in scores:
-        #print(score[0].filename, score[1].filename, score[2], int(score[3]))
+    for i, score in enumerate(scores):
+        if i > 50:
+            break
+        print(score[0].filename, score[1].filename, score[2], int(score[3]))
 
 
     # directions of the second image relative to the first
@@ -114,7 +121,7 @@ def main():
                 grid[x+dx][y+dy] = shard_b 
                 locations[shard_b] = (x+dx, y+dy)
                 
-                print(f"{shard_a.filename} placed ({len(locations.keys())}/256)")
+                # print(f"{shard_a.filename} placed ({len(locations.keys())}/256)")
                 break
 
             if shard_b in locations.keys():
@@ -130,7 +137,7 @@ def main():
                 grid[x-dx][y-dy] = shard_a 
                 locations[shard_a] = (x-dx, y-dy)
                 
-                print(f"{shard_b.filename} placed ({len(locations.keys())}/256)")
+                # print(f"{shard_b.filename} placed ({len(locations.keys())}/256)")
                 break
             
     final_image = np.zeros((Y_SHARDS * SHARD_HEIGHT, X_SHARDS * SHARD_WIDTH), dtype=np.uint8)
