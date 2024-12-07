@@ -44,7 +44,7 @@ class Shard:
         
         val = 0
         for t in diff:
-            val += math.sqrt(t[0]**2 + t[1]**2 + t[2]**2)
+            val += np.sum(t**2)
         
         return val / len(diff)
 
@@ -65,6 +65,11 @@ def main():
         if shard.filename == "chunk_964560701.png":
             grid[15][15] = shard 
             locations[shard] = (15, 15)
+            
+            #print(shard.edges[0], len(shard.edges[0]))
+            #print(shard.edges[1], len(shard.edges[1]))
+            #print(shard.edges[2], len(shard.edges[2]))
+            #print(shard.edges[3], len(shard.edges[3]))
         
         #print(shard.edges)
 
@@ -84,6 +89,9 @@ def main():
 
             for direction in range(4):
                 scores.append((shard_a, shard_b, direction, shard_a.compare_to_opposite_edge(direction, shard_b))) 
+                
+                if shard_b.filename == "chunk_964560701.png" and shard_a.compare_to_opposite_edge(direction, shard_b) <= 100:
+                    print(shard_a.filename, direction, shard_a.compare_to_opposite_edge(direction, shard_b))
 
     scores = sorted(scores, key=lambda x: x[3])
 
@@ -92,11 +100,16 @@ def main():
     for i, score in enumerate(scores):
         if i > 50:
             break
-        print(score[0].filename, score[1].filename, score[2], int(score[3]))
+        #print(score[0].filename, score[1].filename, score[2], int(score[3]))
 
+    #shard_a, shard_b, direction, val = scores[0]
+    
+    #grid[7][7] = shard_a
+    #locations[shard_a] = (7, 7)
+    
 
     # directions of the second image relative to the first
-    directions = [(0, -1), (-1, 0), (0, 1), (1, 0)]
+    directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
 
     while len(locations.keys()) < 256:
         for score in scores:
@@ -117,6 +130,8 @@ def main():
 
                 if grid[x+dx][y+dy]:
                     continue
+                
+                print(shard_a.filename, shard_b.filename, direction, val)
 
                 grid[x+dx][y+dy] = shard_b 
                 locations[shard_b] = (x+dx, y+dy)
@@ -133,6 +148,8 @@ def main():
                 
                 if grid[x-dx][y-dy]:
                     continue
+                
+                print(shard_a.filename, shard_b.filename, direction, val)
 
                 grid[x-dx][y-dy] = shard_a 
                 locations[shard_a] = (x-dx, y-dy)
