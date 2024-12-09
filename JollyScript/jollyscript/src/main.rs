@@ -123,7 +123,7 @@ fn main() {
                     }
                     '.' => {
                         if let Some(last) = stack.last() {
-                            print!("{:x}", *last);
+                            print!("{:X}", *last);
                         }
                     }
                     'A'..='F' => {
