@@ -1,3 +1,4 @@
+use std::env;
 use std::fs;
 use std::time::Instant;
 
@@ -9,7 +10,16 @@ struct Node {
 }
 
 fn main() {
-    let contents = fs::read_to_string("code.jos").expect("Read error");
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        eprintln!("Usage: {} <filename>", args[0]);
+        std::process::exit(1);
+    }
+
+    let filename = &args[1];
+
+    let contents = fs::read_to_string(filename).expect("Read error");
 
     let time_start = Instant::now();
 
@@ -110,6 +120,11 @@ fn main() {
                     }
                     '$' => {
                         stack.pop();
+                    }
+                    '.' => {
+                        if let Some(last) = stack.last() {
+                            print!("{:x}", *last);
+                        }
                     }
                     'A'..='F' => {
                         stack.push((ch as u8 - b'A' + 10) as i32);
